@@ -36,11 +36,11 @@ resource aws_instance test-backend {
 */
 
 resource aws_autoscaling_group backend {
-  name                      = "${var.Name_tag_prefix}-backend-asg3"
+  name                      = "${var.Name_tag_prefix}-backend-asg5"
   min_size                  = 2
   desired_capacity          = 2
   max_size                  = 5
-  health_check_grace_period = 720
+  health_check_grace_period = 900
   health_check_type         = "ELB"
   default_cooldown          = 3600
   force_delete              = true

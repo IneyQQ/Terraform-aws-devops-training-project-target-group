@@ -4,12 +4,16 @@ locale: en_US.UTF-8
 write_files:
   - content: |
       [Service]
-      ExecStart=/usr/bin/java -jar /opt/backend/backend.jar --spring.config.location=file:/opt/backend/
+      ExecStart=/usr/bin/java -javaagent:/opt/backend/jmx_prometheus_javaagent-0.13.0.jar=8081:/opt/backend/jmx-config.yaml -jar /opt/backend/backend.jar --spring.config.location=file:/opt/backend/
       SyslogIdentifier=backend
     path: /etc/systemd/system/backend.service
   - content: |
       if $programname == 'backend' then /var/log/backend
     path: /etc/rsyslog.d/backend.conf
+  - content: |
+      ---
+      hostPort: $SERVER_HOST:$SERVER_PORT
+    path: /opt/backend/jmx-config-template.yaml
 runcmd:
   - snap refresh amazon-ssm-agent
   - |
@@ -34,11 +38,13 @@ runcmd:
     ./gradlew build -x test
   - |
     # Install backend
-    mkdir /opt/backend
+    mkdir -p /opt/backend
     cd /opt/backend
     mv /opt/backend-source/build/libs/backend-*.jar ./backend.jar
     mv /opt/backend-source/build/resources/main/application.properties ./application-template.properties
     DB_URL=${db_url} DB_PORT=${db_port} DB_NAME=${db_name} DB_USERNAME=${db_username} DB_PASSWORD=${db_password} envsubst < application-template.properties > application.properties
+    wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.13.0/jmx_prometheus_javaagent-0.13.0.jar
+    SERVER_HOST=$(ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1) SERVER_PORT=8081 envsubst < jmx-config-template.yaml > jmx-config.yaml
   - |
     # Run backend
     systemctl restart rsyslog
