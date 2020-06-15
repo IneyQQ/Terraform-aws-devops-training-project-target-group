@@ -22,7 +22,7 @@ resource aws_db_instance main {
 
 resource aws_db_subnet_group main {
   name       = "${var.Name_tag_prefix}-dbsg"
-  subnet_ids = aws_subnet.nointernet.*.id
+  subnet_ids = data.aws_subnet.db.*.id
 
   tags = merge(var.tags,
     {

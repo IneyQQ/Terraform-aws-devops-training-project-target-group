@@ -1,0 +1,45 @@
+#cloud-config
+# -*- YAML -*-
+locale: en_US.UTF-8
+write_files:
+  - content: |
+      [Service]
+      ExecStart=/usr/bin/java -jar /opt/backend/backend.jar --spring.config.location=file:/opt/backend/
+      SyslogIdentifier=backend
+    path: /etc/systemd/system/backend.service
+  - content: |
+      if $programname == 'backend' then /var/log/backend
+    path: /etc/rsyslog.d/backend.conf
+runcmd:
+  - snap refresh amazon-ssm-agent
+  - |
+    apt update
+    apt install -y openjdk-8-jdk
+  - |
+    # Load backup project
+    set -xe
+    cd /opt
+    mkdir backend-source
+    cd backend-source
+    wget -O - https://github.com/Pavel-Soloduha/devops-training-project/tarball/master | tar xz
+    from_dir=Pavel-Soloduha-devops-training-project-*/backend
+    for x in $from_dir/* $from_dir/.[!.]* $from_dir/..?*; do
+      if [ -e "$x" ]; then mv -- "$x" .; fi
+    done
+    rm -rf Pavel-Soloduha-devops-training-project-*
+  - |
+    # Build backup project
+    cd /opt/backend-source
+    ./gradlew
+    ./gradlew build -x test
+  - |
+    # Install backend
+    mkdir /opt/backend
+    cd /opt/backend
+    mv /opt/backend-source/build/libs/backend-*.jar ./backend.jar
+    mv /opt/backend-source/build/resources/main/application.properties ./application-template.properties
+    DB_URL=${db_url} DB_PORT=${db_port} DB_NAME=${db_name} DB_USERNAME=${db_username} DB_PASSWORD=${db_password} envsubst < application-template.properties > application.properties
+  - |
+    # Run backend
+    systemctl restart rsyslog
+    systemctl start backend

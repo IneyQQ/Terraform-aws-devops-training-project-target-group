@@ -1,0 +1,29 @@
+#cloud-config
+# -*- YAML -*-
+locale: en_US.UTF-8
+runcmd:
+  - |
+    #apt update
+    curl -sL https://deb.nodesource.com/setup_10.x | bash
+    apt install -y nodejs nginx
+  - |
+    # Load backup project
+    set -xe
+    cd /opt
+    mkdir frontend-source
+    cd frontend-source
+    wget -O - https://github.com/Pavel-Soloduha/devops-training-project/tarball/master | tar xz
+    from_dir=Pavel-Soloduha-devops-training-project-*/frontend
+    for x in $from_dir/* $from_dir/.[!.]* $from_dir/..?*; do
+      if [ -e "$x" ]; then mv -- "$x" .; fi
+    done
+    rm -rf Pavel-Soloduha-devops-training-project-*
+  - |
+    # Build backup project
+    cd /opt/frontend-source
+    npm install
+    npm run build
+    mv build/* /var/www/html/
+    rm -rf /opt/frontend-source
+    cd /var/www/html/static/js
+    sed 's|https://conduit.productionready.io/api|${backend_url}|' -i *
