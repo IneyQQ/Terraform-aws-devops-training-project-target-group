@@ -35,7 +35,7 @@ runcmd:
     # Build backup project
     cd /opt/backend-source
     ./gradlew
-    ./gradlew build -x test
+    ./gradlew build -x test -x findbugsMain -x findbugsTest -x pmdMain -x pmdTest -x checkstyleMain -x checkstyleTest
   - |
     # Install backend
     mkdir -p /opt/backend
