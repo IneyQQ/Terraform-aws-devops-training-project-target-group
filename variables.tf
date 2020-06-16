@@ -61,6 +61,7 @@ variable frontend_ami {
 variable frontend_type {
   default = "t2.micro"
 }
+variable logstash_host_port {}
 
 #
 # Public access vars

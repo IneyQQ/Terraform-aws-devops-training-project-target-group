@@ -6,6 +6,7 @@ data template_file backend {
     db_name = var.db_name,
     db_username = var.db_username,
     db_password = var.db_password
+    logstash_host_port = var.logstash_host_port
   }
 }
 
@@ -19,7 +20,6 @@ resource aws_launch_configuration backend {
   iam_instance_profile = var.iam_instance_profile_name
 }
 
-/*
 resource aws_instance test-backend {
   subnet_id            = data.aws_subnet.backend[0].id
   ami                  = var.backend_ami
@@ -27,14 +27,17 @@ resource aws_instance test-backend {
   key_name             = var.key_name
   vpc_security_group_ids = []
   user_data     = data.template_file.backend.rendered
+  security_groups      = concat([aws_security_group.backend.id], var.backend_sg_ids)
   tags = merge(var.tags,
     {
-      Name = "${var.Name_tag_prefix}-test"
+      Name = "${var.Name_tag_prefix}-backend"
     }
   )
 }
+/*
 */
 
+/*
 resource aws_autoscaling_group backend {
   name                      = "${var.Name_tag_prefix}-backend-asg5"
   min_size                  = 2
@@ -72,7 +75,6 @@ resource aws_autoscaling_policy backend_down {
   scaling_adjustment     = -1
   autoscaling_group_name = aws_autoscaling_group.backend.name
 }
-/*
 */
 
 resource aws_lb_target_group backend {

@@ -41,10 +41,16 @@ runcmd:
     mkdir -p /opt/backend
     cd /opt/backend
     mv /opt/backend-source/build/libs/backend-*.jar ./backend.jar
+    # Configure Spring
     mv /opt/backend-source/build/resources/main/application.properties ./application-template.properties
     DB_URL=${db_url} DB_PORT=${db_port} DB_NAME=${db_name} DB_USERNAME=${db_username} DB_PASSWORD=${db_password} envsubst < application-template.properties > application.properties
+    # Configure JMX
     wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.13.0/jmx_prometheus_javaagent-0.13.0.jar
     SERVER_HOST=$(ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1) SERVER_PORT=8081 envsubst < jmx-config-template.yaml > jmx-config.yaml
+    # Configure logstash logging
+    jar xf backend.jar BOOT-INF/classes/logback-logstash-template.xml
+    LOGSTASH_HOST_PORT=${logstash_host_port} envsubst < BOOT-INF/classes/logback-logstash-template.xml > BOOT-INF/classes/logback.xml
+    jar -uf backend.jar BOOT-INF/classes/logback.xml
   - |
     # Run backend
     systemctl restart rsyslog
