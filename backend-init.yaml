@@ -51,6 +51,7 @@ runcmd:
     jar xf backend.jar BOOT-INF/classes/logback-logstash-template.xml
     LOGSTASH_HOST_PORT=${logstash_host_port} envsubst < BOOT-INF/classes/logback-logstash-template.xml > BOOT-INF/classes/logback.xml
     jar -uf backend.jar BOOT-INF/classes/logback.xml
+    rm -rf BOOT-INF
   - |
     # Run backend
     systemctl restart rsyslog
