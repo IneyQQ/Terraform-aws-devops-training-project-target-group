@@ -38,6 +38,14 @@ variable backend_instance_name {
 variable db_instance_name {
   default = "db"
 }
+variable backend_sg_ids {
+  type = list(string)
+  default = []
+}
+variable frontend_sg_ids {
+  type = list(string)
+  default = []
+}
 variable route53_private_zone_id {}
 variable iam_instance_profile_name {}
 variable key_name {}

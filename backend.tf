@@ -15,7 +15,7 @@ resource aws_launch_configuration backend {
   instance_type        = var.backend_type
   key_name             = var.key_name
   user_data            = data.template_file.backend.rendered
-  security_groups      = [aws_security_group.backend.id]
+  security_groups      = concat([aws_security_group.backend.id], var.backend_sg_ids)
   iam_instance_profile = var.iam_instance_profile_name
 }
 

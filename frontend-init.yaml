@@ -12,12 +12,12 @@ runcmd:
     cd /opt
     mkdir frontend-source
     cd frontend-source
-    wget -O - https://github.com/Pavel-Soloduha/devops-training-project/tarball/master | tar xz
-    from_dir=Pavel-Soloduha-devops-training-project-*/frontend
+    wget -O - https://github.com/IneyQQ/devops-training-project-frontend/tarball/master | tar xz
+    from_dir=IneyQQ-devops-training-project-frontend-*
     for x in $from_dir/* $from_dir/.[!.]* $from_dir/..?*; do
       if [ -e "$x" ]; then mv -- "$x" .; fi
     done
-    rm -rf Pavel-Soloduha-devops-training-project-*
+    rmdir $from_dir
   - |
     # Build backup project
     cd /opt/frontend-source
