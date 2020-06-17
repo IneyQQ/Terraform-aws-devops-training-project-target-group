@@ -26,13 +26,18 @@ resource aws_instance test-backend {
   instance_type        = var.backend_type
   key_name             = var.key_name
   vpc_security_group_ids = []
-  user_data     = data.template_file.backend.rendered
+  user_data            = data.template_file.backend.rendered
   security_groups      = concat([aws_security_group.backend.id], var.backend_sg_ids)
   tags = merge(var.tags,
     {
       Name = "${var.Name_tag_prefix}-backend"
     }
   )
+}
+resource aws_lb_target_group_attachment test-backend {
+  target_group_arn = aws_lb_target_group.backend.arn
+  target_id        = aws_instance.test-backend.id
+  port             = 8080
 }
 /*
 */
